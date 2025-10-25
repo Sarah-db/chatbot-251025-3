@@ -1,53 +1,59 @@
 import streamlit as st
 from openai import OpenAI
 
-# Show title and description.
-st.title("🌟🍬✦🍎나의 Chatbot")
+# 제목과 설명
+st.title("💬 Chatbot")
 st.write(
     "This is a simple chatbot that uses OpenAI's GPT-3.5 model to generate responses. "
-    "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys). "
-    "You can also learn how to build this app step by step by [following our tutorial](https://docs.streamlit.io/develop/tutorials/llms/build-conversational-apps)."
+    "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys)."
 )
 
-# Ask user for their OpenAI API key via `st.text_input`.
+# API 키 입력
 openai_api_key = st.text_input("OpenAI API Key", type="password")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
 else:
-    # Create an OpenAI client.
+    # OpenAI 클라이언트 생성
     client = OpenAI(api_key=openai_api_key)
 
-    # Initialize chat history
+    # 세션 상태 초기화
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # --- 🧹 Add a clear chat button ---
-    if st.button("🧹 Clear Chat"):
+    # 🧹 대화 초기화 버튼 ("테스트")
+    if st.button("대화 초기화"):
         st.session_state.messages = []
-        st.experimental_rerun()
+        st.rerun()  # 최신 Streamlit에서 사용
 
-    # Display the existing chat messages
+    # 기존 대화 출력
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Chat input
+    # 사용자 입력
     if prompt := st.chat_input("What is up?"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Generate response
-        stream = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
-            ],
-            stream=True,
-        )
-
-        # Display streamed response
+        # 모델 응답 스트리밍
         with st.chat_message("assistant"):
-            response = st.write_stream(stream)
-        st.session_state.messages.append({"role": "assistant", "content": response})
+            message_placeholder = st.empty()
+            full_response = ""
+
+            for chunk in client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": m["role"], "content": m["content"]}
+                    for m in st.session_state.messages
+                ],
+                stream=True,
+            ):
+                if hasattr(chunk.choices[0].delta, "content") and chunk.choices[0].delta.content:
+                    full_response += chunk.choices[0].delta.content
+                    message_placeholder.markdown(full_response + "▌")
+
+            message_placeholder.markdown(full_response)
+
+        # 응답 저장
+        st.session_state.messages.append({"role": "assistant", "content": full_response})

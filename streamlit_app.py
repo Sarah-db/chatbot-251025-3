@@ -11,7 +11,7 @@ st.write(
 
 # Ask user for their OpenAI API key via `st.text_input`.
 # Alternatively, you can store the API key in `./.streamlit/secrets.toml` and access it
-# via `st.secrets`, see https://docs.streamlit.io/develop/concepts/connections/secrets-management
+# via `st.secrets`, see [https://docs.streamlit.io/develop/concepts/connections/secrets-management](https://docs.streamlit.io/develop/concepts/connections/secrets-management)
 openai_api_key = st.text_input("OpenAI API Key", type="password")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
@@ -24,6 +24,11 @@ else:
     # messages persist across reruns.
     if "messages" not in st.session_state:
         st.session_state.messages = []
+
+    # 대화 초기화 버튼 추가
+    if st.button("🔄 대화 초기화", type="secondary"):
+        st.session_state.messages = []
+        st.rerun()
 
     # Display the existing chat messages via `st.chat_message`.
     for message in st.session_state.messages:

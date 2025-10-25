@@ -2,7 +2,7 @@ import streamlit as st
 from openai import OpenAI
 
 # Show title and description.
-st.title("💬 Chatbot")
+st.title("✦✦MY👾CHATBOT✦✦")
 st.write(
     "This is a simple chatbot that uses OpenAI's GPT-3.5 model to generate responses. "
     "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys). "
@@ -26,7 +26,7 @@ else:
         st.session_state.messages = []
 
     # 대화 초기화 버튼 추가
-    if st.button("🔄 대화 초기화", type="secondary"):
+    if st.button("대화 초기화", type="secondary"):
         st.session_state.messages = []
         st.rerun()
 
